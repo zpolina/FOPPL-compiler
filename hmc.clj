@@ -191,21 +191,3 @@
        y (sample (normal 0 10))]
    (observe (normal (+ x y) 0.1) 7)
    [x y])))
-
-
-(let [code '(fn [x] (if (> x 5) (* x x) (+ x 18)))
- [res bp] (apply (eval (apply reverse-diff* (rest code))) [5.00001])]
-  [res bp])
-
-
-(let [code  '(fn [sample22348 ] (+ (normpdf 9 sample22348 (sqrt 2)) (normpdf 8 sample22348 (sqrt 2)) (normpdf sample22348 1 (sqrt 5))))
- [res bp] (apply (eval (apply reverse-diff* (rest code))) [2.0])]
-  (bp 1.0))
-
-(let [code '(fn [x1 x2 x3] (+ (+ (normpdf x1 2 5)
-                                             (if (> x2 7)
-                                               (normpdf x2 0 1)
-                                               (normpdf x2 10 1)))
-                                          (normpdf x3 -4 10)))
-      [res bp] (apply (eval (apply reverse-diff* (rest code))) [1.2 2.1 4])]
-       (bp 1.0))
