@@ -99,10 +99,10 @@
        diff (eval (apply reverse-diff* (rest f)))
        num-vars (count vars)
        means (M/matrix (vec (replicate num-vars 0)))
-       M (M/identity-matrix num-vars)
+       M (M/mmul 1000 (M/identity-matrix num-vars))
        M-inv (M/inverse M)
-       T 5
-       eps 0.00001
+       T 10
+       eps 0.01
        ]
        [links X vars return-map T eps means M M-inv diff depends]
    ))
@@ -113,8 +113,9 @@
         X X
         R1_2 (M/sub R (M/mul 0.5 (M/mul eps (bp 1.0))))]
     (if (= 0 T)
-      [(zipmap depends (M/add (postwalk-replace X depends) R1_2))
-       (M/sub R1_2 (M/mul 0.5 (M/mul eps ((second (apply deriv (postwalk-replace (zipmap depends (M/add (postwalk-replace X depends) R1_2)) depends))) 1.0))))]
+     (let [Xt (zipmap depends (M/add (postwalk-replace X depends) (M/mmul eps R1_2))) 
+          Rt (M/sub R1_2 (M/mul 0.5 (M/mul eps ((second (apply deriv (postwalk-replace Xt depends))) 1.0))))]
+      [Xt Rt])
       (let [
           Xt (M/add (postwalk-replace X depends) (M/mul eps R1_2))
           Xt (zipmap depends Xt)
@@ -157,7 +158,7 @@
         (mean samples) )
 (let [samples (take 200000 (drop 10000 (hmc program2)))]
         (mean samples))
-(let [samples (take 500000 (drop 50000 (hmc program3)))]
+(let [samples (take 1000000 (drop 10000 (hmc program3)))]
         [(mean samples) (std samples)])
 
 
@@ -189,5 +190,5 @@
 
  (def program3 '((let [x (sample (normal 0 10))
        y (sample (normal 0 10))]
-   (observe (normal (+ x y) 0.1) 7)
+   (observe (normal (+ x y) 0.01) 7)
    [x y])))
